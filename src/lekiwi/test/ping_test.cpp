@@ -5,35 +5,36 @@
 
 SMS_STS sm_st;
 
-int main(int argc, char** argv)
+int main(int /*argc*/, char** /*argv*/)
 {
-  const char* port = "/dev/ttyACM0";  // Use absolute path
-  std::cout << "serial:" << port << std::endl;
+  const char* port = "/dev/ttyACM0";
+  std::cout << "串口: " << port << std::endl;
 
+  // 打开串口
   if (!sm_st.begin(1000000, port))
   {
-    std::cout << "Failed to init sms/sts motor!" << std::endl;
-    return 0;
+    std::cout << "串口打开失败！" << std::endl;
+    return -1;
   }
 
-  // Add delay after initialization
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  std::cout << "开始扫描 ID 0 ~ 20...\n" << std::endl;
 
-  std::cout << "Attempting ping..." << std::endl;
-  int ID = sm_st.Ping(1);
-  std::cout << "Ping returned: " << ID << std::endl;
-
-  if (ID != -1)
+  // 扫描 0 ~ 20 号电机
+  for (int id = 0; id <= 20; id++)
   {
-    std::cout << "ID:" << ID << std::endl;
-  }
-  else
-  {
-    std::cout << "Ping servo ID error!" << std::endl;
+    int ret = sm_st.Ping(id);
+    if (ret != -1)
+    {
+      std::cout << "找到电机 ID: " << ret << std::endl;
+    }
+
+    // 必须加延时，防止发太快
+    std::this_thread::sleep_for(std::chrono::milliseconds(20));
   }
 
-  // Add delay before end
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  std::cout << "\n扫描完成！" << std::endl;
+
   sm_st.end();
-  return 1;
+  return 0;
 }
