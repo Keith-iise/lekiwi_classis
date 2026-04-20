@@ -32,6 +32,12 @@ def generate_launch_description():
         parameters=[controller_config, robot_description],
         output='screen',
     )
+    # joint_state_publisher = Node(
+    #     package='joint_state_publisher',
+    #     executable='joint_state_publisher',
+    #     name='joint_state_publisher',
+    #     parameters=[{'use_gui': False}],  # True 打开滑块调关节角度
+    # )
 
     # # 启动关节状态广播
     # joint_state_broadcaster = Node(
