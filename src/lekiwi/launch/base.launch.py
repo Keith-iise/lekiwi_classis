@@ -46,7 +46,6 @@ def generate_launch_description():
         executable='spawner',
         arguments=['lekiwi_wheel_controller'],
     )
-
     # # 按顺序启动
     # delay_wheel_controller = RegisterEventHandler(
     #     OnProcessExit(
@@ -55,16 +54,20 @@ def generate_launch_description():
     #     )
     # )
     # Holonomic controller for omniwheels
-    holonomic_controller_node = Node(
+    base_controller_node = Node(
         package='lekiwi',
         executable='base_controller.py',
         name='base_controller',
         parameters=[{
-            'wheel_radius': 0.05,      # 5cm wheel radius
-            'base_radius': 0.125,      # 12.5cm from center to wheel
-            'max_wheel_velocity': 3.0, # max rad/s per wheel
-            'cmd_timeout': 0.2,        # safety timeout
-            'control_freq': 50.0, # safety check frequency
+            'wheel_radius': 0.05,      # 轮径
+            'base_radius': 0.125,      # 底盘半径
+            'max_wheel_velocity': 3.0, # 最大加速度
+            'cmd_timeout': 0.5,        # 松手延迟， 舵机需要缓慢停下来，否则会很快过热
+            'ramp_rate': 5.0,             # 加速限制，单位 m/s^2 或 rad/s^2
+            'control_freq': 50.0,       # 底盘控制频率
+            'odom_frame_id': 'odom',
+            'base_frame_id': 'base_link',
+            'publish_tf': True,
         }],
         output='screen',
     )
@@ -74,5 +77,5 @@ def generate_launch_description():
         robot_state_publisher,
         controller_manager,
         wheel_controller,
-        holonomic_controller_node,
+        base_controller_node,
     ])
