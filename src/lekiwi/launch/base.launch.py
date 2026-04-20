@@ -1,83 +1,63 @@
 #!/usr/bin/env python3
 
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, RegisterEventHandler
+from launch.actions import RegisterEventHandler
 from launch.event_handlers import OnProcessExit
-from launch.substitutions import Command, FindExecutable, PathJoinSubstitution
+from launch.substitutions import Command, PathJoinSubstitution
 from launch_ros.actions import Node
 from launch_ros.substitutions import FindPackageShare
-from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
+    # 路径配置
+    pkg_path = FindPackageShare('lekiwi')
+    urdf_path = PathJoinSubstitution([pkg_path, 'urdf', 'lekiwi_base.urdf'])
+    controller_config = PathJoinSubstitution([pkg_path, 'config', 'controllers.yaml'])
 
-    # ------------------------------------------
-    # 仅底盘：无机械臂、无夹爪、无rviz
-    # ------------------------------------------
-
-    robot_description_content = Command(
-        [
-            FindExecutable(name='xacro'), ' ',
-            PathJoinSubstitution(
-                [FindPackageShare('lekiwi'), 'urdf', 'lekiwi_base.urdf']
-            ),
-            ' ',
-            'use_fake_hardware:=false'
-        ]
-    )
-
+    # 读取机器人描述（标准写法，不会报错）
     robot_description = {
-        'robot_description': ParameterValue(robot_description_content, value_type=str)
+        'robot_description': Command(['xacro ', urdf_path])
     }
 
-    # 发布机器人状态
-    robot_state_pub_node = Node(
+    # 机器人状态发布
+    robot_state_publisher = Node(
         package='robot_state_publisher',
         executable='robot_state_publisher',
-        output='screen',
-        parameters=[robot_description]
+        parameters=[robot_description],
     )
 
-    # ros2_control 核心
+    # 控制器管理器
     controller_manager = Node(
-        package="controller_manager",
-        executable="ros2_control_node",
-        parameters=[
-            robot_description,
-            PathJoinSubstitution([FindPackageShare('lekiwi'), 'config', 'controllers.yaml']),
-        ],
-        output="screen",
+        package='controller_manager',
+        executable='ros2_control_node',
+        parameters=[controller_config, robot_description],
+        output='screen',
     )
 
-    # 状态广播（必须）
-    joint_state_broadcaster_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
+    # 启动关节状态广播
+    joint_state_broadcaster = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['joint_state_broadcaster'],
     )
 
-    # 底盘速度控制器（唯一需要的控制器）
-    wheel_controller_spawner = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["lekiwi_wheel_controller", "-c", "/controller_manager"],
-        output="screen",
+    # 启动底盘控制器
+    wheel_controller = Node(
+        package='controller_manager',
+        executable='spawner',
+        arguments=['lekiwi_wheel_controller'],
     )
 
-    # 顺序启动：先状态广播 → 再轮子控制器
+    # 按顺序启动
     delay_wheel_controller = RegisterEventHandler(
-        event_handler=OnProcessExit(
-            target_action=joint_state_broadcaster_spawner,
-            on_exit=[wheel_controller_spawner],
+        OnProcessExit(
+            target_action=joint_state_broadcaster,
+            on_exit=[wheel_controller],
         )
     )
 
-    
-
     return LaunchDescription([
-        robot_state_pub_node,
+        robot_state_publisher,
         controller_manager,
-        joint_state_broadcaster_spawner,
+        joint_state_broadcaster,
         delay_wheel_controller,
-        # holonomic_controller_node,
-        # odometry_publisher_node
     ])

@@ -35,6 +35,8 @@ namespace lekiwi_controller
         velocity_comads_.resize(num_joints, 0.0);
         // 状态变量接口
         velocity_states_.resize(num_joints, 0.0);
+        velocity_comads_.assign(num_joints, 0.0);
+        velocity_states_.assign(num_joints, 0.0);
         
         RCLCPP_INFO(rclcpp::get_logger(NodeName), "初始化 Lekiwi 成功 , 关节数量: %zu 个", num_joints);
 
@@ -89,7 +91,12 @@ namespace lekiwi_controller
         // executor_ = std::make_shared<rclcpp::executors::SingleThreadedExecutor>();
         // executor_->add_node(node_);
         // spin_thread_ = std::thread([this]() { executor_->spin(); });
-
+        for (size_t i = 0; i < info_.joints.size(); ++i)
+        {
+            uint8_t servo_id = static_cast<uint8_t>(i + start_sevro_id_);
+            st3215_.EnableTorque(servo_id, 1);  // 1 = 使能
+            RCLCPP_INFO(rclcpp::get_logger(NodeName), "电机 %d 已使能", servo_id);
+        }
 
         RCLCPP_INFO(rclcpp::get_logger(NodeName), "Lekiwi 底层激活成功！！");
         return CallbackReturn::SUCCESS;
@@ -102,7 +109,7 @@ namespace lekiwi_controller
             for(size_t i = 0; i < info_.joints.size(); i++)
             {
                 uint8_t servo_id = static_cast<uint8_t>(i + start_sevro_id_);
-                std::this_thread::sleep_for(std::chrono::milliseconds(1));
+                // std::this_thread::sleep_for(std::chrono::milliseconds(1));
 
                 if (st3215_.FeedBack(servo_id) != -1)
                 {
@@ -120,35 +127,33 @@ namespace lekiwi_controller
         }
         return hardware_interface::return_type::OK;
     }
-
-    ReturnType LekiwiBase::write(const rclcpp::Time& /*time*/, const rclcpp::Duration& /*period*/)
+    hardware_interface::return_type LekiwiBase::write(const rclcpp::Time&, const rclcpp::Duration&)
     {
-        if (use_serial_ && torque_enabled_)
-        {
-            for (size_t i = 0; i < info_.joints.size(); ++i)
-            {
-                uint8_t servo_id = static_cast<uint8_t>(i + start_sevro_id_);
-                double velocity_rad_s = velocity_comads_[i];
 
-                double velocity_deg_s = velocity_rad_s * (180.0 / M_PI);
-                double steps_per_deg = 4096.0 / 360.0;
-                int16_t wheel_speed = static_cast<int16_t>(velocity_deg_s * steps_per_deg);
 
-                wheel_speed *= servo_directions_[i];
+        if (!use_serial_) return hardware_interface::return_type::OK;
 
-                RCLCPP_DEBUG(rclcpp::get_logger(NodeName),
+        for (size_t i = 0; i < info_.joints.size(); i++) {
+            uint8_t servo_id = static_cast<uint8_t>(i + start_sevro_id_);
+            double velocity_rad_s = velocity_comads_[i];
+
+            double velocity_deg_s = velocity_rad_s * (180.0 / M_PI);
+            double steps_per_deg = 4096.0 / 360.0;
+            int16_t wheel_speed = static_cast<int16_t>(velocity_deg_s * steps_per_deg);
+
+            wheel_speed *= servo_directions_[i];
+            RCLCPP_DEBUG(rclcpp::get_logger(NodeName),
                             "WHEEL Servo %d velocity: %.3f rad/s -> %.1f deg/s -> %d raw", servo_id, velocity_rad_s,
                             velocity_deg_s, wheel_speed);
-
-                if (!st3215_.WriteSpe(servo_id, wheel_speed, 50))
-                {
-                    RCLCPP_WARN(rclcpp::get_logger(NodeName), "无法写入轮子电机: %d", servo_id);
-                }
+            if (!st3215_.WriteSpe(servo_id, wheel_speed, 50)){
+                RCLCPP_WARN(rclcpp::get_logger(NodeName), "无法写入轮子电机: %d", servo_id);
             }
-            st3215_.RegWriteAction();
         }
+
+        st3215_.RegWriteAction();
         return hardware_interface::return_type::OK;
     }
+
 
     CallbackReturn LekiwiBase::on_deactivate(const rclcpp_lifecycle::State& /*previous_state*/)
     {
