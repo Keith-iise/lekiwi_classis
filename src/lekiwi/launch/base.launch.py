@@ -54,10 +54,25 @@ def generate_launch_description():
             on_exit=[wheel_controller],
         )
     )
+    # Holonomic controller for omniwheels
+    holonomic_controller_node = Node(
+        package='lekiwi',
+        executable='holonomic_controller.py',
+        name='holonomic_controller',
+        parameters=[{
+            'wheel_radius': 0.05,      # 5cm wheel radius
+            'base_radius': 0.125,      # 12.5cm from center to wheel
+            'max_wheel_velocity': 3.0, # max rad/s per wheel
+            'cmd_timeout': 0.2,        # safety timeout
+            'safety_check_rate': 50.0, # safety check frequency
+        }],
+        output='screen',
+    )
 
     return LaunchDescription([
         robot_state_publisher,
         controller_manager,
         joint_state_broadcaster,
         delay_wheel_controller,
+        holonomic_controller_node
     ])

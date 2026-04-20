@@ -105,21 +105,21 @@ install(
     ping_test
   DESTINATION lib/${PROJECT_NAME}
 )
-# install(
-#   PROGRAMS
-#     scripts/calibrate_arm.py
-#     scripts/zero_pose.py
-#     scripts/jog_joints.py
-#     scripts/holonomic_controller.py
-#     scripts/test_holonomic.py
-#     scripts/manual_holonomic.py
-#     scripts/test_wheel_velocity.py
-#     scripts/test_safety_timeout.py
-#     scripts/odometry_publisher.py
-#     scripts/test_odometry.py
-#   DESTINATION 
-#     lib/${PROJECT_NAME}
-# )
+install(
+  PROGRAMS
+    # scripts/calibrate_arm.py
+    # scripts/zero_pose.py
+    # scripts/jog_joints.py
+    scripts/holonomic_controller.py
+    # scripts/test_holonomic.py
+    # scripts/manual_holonomic.py
+    # scripts/test_wheel_velocity.py
+    # scripts/test_safety_timeout.py
+    # scripts/odometry_publisher.py
+    # scripts/test_odometry.py
+  DESTINATION 
+    lib/${PROJECT_NAME}
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
