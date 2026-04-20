@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot name="lekiwi">
+
+  <link name="base_link"/>
+  <link name="left_wheel_link"/>
+  <link name="rear_wheel_link"/>
+  <link name="right_wheel_link"/>
+
+  <joint name="left_wheel_drive" type="continuous">
+    <parent link="base_link"/>
+    <child link="left_wheel_link"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <joint name="rear_wheel_drive" type="continuous">
+    <parent link="base_link"/>
+    <child link="rear_wheel_link"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <joint name="right_wheel_drive" type="continuous">
+    <parent link="base_link"/>
+    <child link="right_wheel_link"/>
+    <axis xyz="0 0 1"/>
+  </joint>
+
+  <!-- 👇 👇 👇 我给你加的 ros2_control 核心 👇 👇 👇 -->
+  <ros2_control name="lekiwi_base" type="system">
+    <hardware>
+      <plugin>lekiwi_controller/LekiwiBase</plugin>
+    </hardware>
+
+    <joint name="left_wheel_drive">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="rear_wheel_drive">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="right_wheel_drive">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </ros2_control>
+  <!-- 👆 👆 👆 到这里为止 👆 👆 👆 -->
+
+</robot>

@@ -90,6 +90,9 @@ install(
   DIRECTORY
     config
     include
+    launch
+    urdf
+    models
     # config/posses
   DESTINATION 
     share/${PROJECT_NAME}
