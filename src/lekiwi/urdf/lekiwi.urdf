@@ -607,9 +607,9 @@
                         scale="0.001 0.001 0.001" />
                 </geometry>
             </collision>
-    </link>
+        </link>
 
-    <link name="base_link" >
+        <link name="base_link" >
     </link>
 
     <joint name="base_plate_layer1_v5_baseplate2bottom_mount" type="fixed">
@@ -723,7 +723,7 @@
             <origin xyz="0.0 0.0 0.0" rpy="0.0 -0.0 4.7123889804" />
             <parent link="base_link" />
             <child link="robot_base_classis" />
-        </joint>
+    </joint>
 
     <ros2_control name="lekiwi_hardware" type="system">
         <hardware>
