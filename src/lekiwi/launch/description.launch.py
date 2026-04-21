@@ -10,7 +10,7 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
     # 路径配置
     pkg_path = FindPackageShare('lekiwi')
-    urdf_path = PathJoinSubstitution([pkg_path, 'urdf', 'lekiwi_base_model.urdf'])
+    urdf_path = PathJoinSubstitution([pkg_path, 'urdf', 'lekiwi.urdf'])
      # 读取机器人描述（标准写法，不会报错）
     robot_description = {
         'robot_description': Command(['xacro ', urdf_path])

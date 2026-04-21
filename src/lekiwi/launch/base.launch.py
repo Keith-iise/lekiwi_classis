@@ -10,7 +10,7 @@ from launch_ros.substitutions import FindPackageShare
 def generate_launch_description():
     # 路径配置
     pkg_path = FindPackageShare('lekiwi')
-    urdf_path = PathJoinSubstitution([pkg_path, 'urdf', 'lekiwi_base.urdf'])
+    urdf_path = PathJoinSubstitution([pkg_path, 'urdf', 'lekiwi.urdf'])
     controller_config = PathJoinSubstitution([pkg_path, 'config', 'controllers.yaml'])
 
     # 读取机器人描述（标准写法，不会报错）
@@ -32,12 +32,12 @@ def generate_launch_description():
         parameters=[controller_config, robot_description],
         output='screen',
     )
-    # joint_state_publisher = Node(
-    #     package='joint_state_publisher',
-    #     executable='joint_state_publisher',
-    #     name='joint_state_publisher',
-    #     parameters=[{'use_gui': False}],  # True 打开滑块调关节角度
-    # )
+    joint_state_publisher = Node(
+        package='joint_state_publisher',
+        executable='joint_state_publisher',
+        name='joint_state_publisher',
+        parameters=[{'use_gui': False}],  # True 打开滑块调关节角度
+    )
 
     # # 启动关节状态广播
     # joint_state_broadcaster = Node(
@@ -81,6 +81,7 @@ def generate_launch_description():
 
     return LaunchDescription([
         robot_state_publisher,
+        joint_state_publisher,
         controller_manager,
         wheel_controller,
         base_controller_node,
