@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <robot name="lekiwi">
-    <material name="mobile_base_material">
+  <material name="mobile_base_material">
         <color rgba="0.7 0.7 0.7 1.0" />
     </material>
 
@@ -23,11 +23,12 @@
     <material name="wheel_material">
         <color rgba="0.1 0.1 0.1 1.0" />
     </material>
+
     <material name="arm_material">
         <color rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
-    </material>
+  </material>
 
-    <link name="base_plate_layer2-v3">
+  <link name="base_plate_layer2-v3">
         <inertial>
             <origin xyz="1.4406667835883843e-14 -0.000737848116891558 0.0034999999999999966"
                 rpy="0.0 -0.0 0.0" />
@@ -606,7 +607,7 @@
                     scale="0.001 0.001 0.001" />
             </geometry>
         </collision>
-    </link>
+  </link>
 
   <joint name="base_plate_layer1-v5_baseplate2bottom_mount" type="fixed">
         <origin xyz="-0.02 -0.1 0.0" rpy="3.141592653589793 -0.0 0.0" />
@@ -715,8 +716,6 @@
         <parent link="base_link" />
         <child link="94868A713_NO-THREADS_Female-Threaded-Hex-Standoff-5" />
   </joint>
-
-
 
   <ros2_control name="lekiwi_hardware" type="system">
     <hardware>
